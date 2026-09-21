@@ -1,0 +1,507 @@
+{
+  "info": {
+    "_postman_id": "cdcb8418-5658-4bce-9dbc-31b508b570f1",
+    "name": "RestAPI-Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "32871901"
+  },
+  "item": [
+    {
+      "name": "Health Tests",
+      "item": [
+        {
+          "name": "TC-HEALTH-01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\npm.test(\"Success should be true\", function () {\n    pm.expect(response.success).to.eql(true);\n});\n\npm.test(\"Response status should be 200\", function () {\n    pm.expect(response.status).to.eql(200);\n});\n\npm.test(\"Correct message is returned\", function () {\n    pm.expect(response.message).to.eql(\"Notes API is Running\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/health-check",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "health-check"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "**End Point -** [https://practice.expandtesting.com/notes/api/health-check](https://practice.expandtesting.com/notes/api/health-check)\n\n**Method -** <u>GET</u>\n\n**Test Scenario - Login Tests**\n\n| **Test Case ID** | **Test Case Description** |\n| --- | --- |\n| TC-HEALTH-01 | Valid email + Valid password |\n\n**Sample Server Response**\n\n1. Server up and running\n    \n\n``` json\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Successful Request\"\n}\n\n ```"
+    },
+    {
+      "name": "Register Tests",
+      "item": [
+        {
+          "name": "TC-REGISTER-01",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const random = Date.now();\n\npm.variables.set(\"userName\", `john${random}`);\npm.variables.set(\"userEmail\", `john${random}@gmail.com`);\npm.variables.set(\"userPassword\", \"Password123!\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\npm.test(\"HTTP status code should be 201\", function () {\n    pm.response.to.have.status(201);\n});\n\npm.test(\"Success should be true\", function () {\n    pm.expect(response.success).to.eql(true);\n});\n\npm.test(\"Response status should be 201\", function () {\n    pm.expect(response.status).to.eql(201);\n});\n\npm.test(\"Correct message is returned\", function () {\n    pm.expect(response.message).to.eql(\"User account created successfully\");\n});\n\npm.test(\"Response contains user ID\", function () {\n    pm.expect(response.data.id).to.exist;\n});\n\npm.test(\"Email matches submitted email\", function () {\n    pm.expect(response.data.email).to.eql(pm.variables.get(\"userEmail\"));\n});\n\npm.test(\"Name matches submitted name\", function () {\n    pm.expect(response.data.name).to.eql(pm.variables.get(\"userName\"));\n});\n\npm.collectionVariables.set(\n    \"userEmail\",\n    pm.variables.get(\"userEmail\")\n);\n\npm.collectionVariables.set(\n    \"userPassword\",\n    pm.variables.get(\"userPassword\")\n);\n\npm.collectionVariables.set(\n    \"userId\",\n    response.data.id\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{userName}}\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/register",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC-REGISTER-02",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\npm.test(\"HTTP status should be 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Success should be false\", function () {\n    pm.expect(response.success).to.eql(false);\n});\n\npm.test(\"Username is invalid\", function () {\n    pm.expect(response.message).to.eql(\"User name must be between 4 and 30 characters\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/register",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC-REGISTER-03",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\npm.test(\"HTTP status should be 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Success should be false\", function () {\n    pm.expect(response.success).to.eql(false);\n});\n\npm.test(\"Email is invalid\", function () {\n    pm.expect(response.message).to.eql(\"A valid email address is required\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{userName}}\",\n  \"email\": \"\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/register",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC-REGISTER-04",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\npm.test(\"HTTP status should be 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Success should be false\", function () {\n    pm.expect(response.success).to.eql(false);\n});\n\npm.test(\"Password is invalid\", function () {\n    pm.expect(response.message).to.eql(\"Password must be between 6 and 30 characters\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{userName}}\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/register",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "**End Point -** [https://practice.expandtesting.com/notes/api/users/register](https://practice.expandtesting.com/notes/api/users/register)\n\n**Method -** <u>POST</u>\n\n**Request Variables -** name, email, password\n\n**Test Scenario - Login Tests**\n\n| **Test Case ID** | **Test Case Description** |\n| --- | --- |\n| TC-REGISTER-01 | Valid name + email + password |\n| TC-REGISTER-02 | Invalid username |\n| TC-REGISTER-03 | Invalid email |\n| TC-REGISTER-04 | Invalid password |\n\n**Sample Server Response**\n\n1. User Registered\n    \n\n``` json\n{\n  \"success\": true,\n  \"status\": 201,\n  \"message\": \"User account created successfully\",\n  \"data\": {\n    \"id\": 6,\n    \"name\": \"practice\",\n    \"email\": \"practice@expandtesting.com\"\n  }\n\n ```\n\n2\\. Invalid username\n\n``` json\n{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"User name must be between 4 and 30 characters\"\n}\n\n ```\n\n3\\. Invalid email\n\n``` json\n{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"A valid email address is required\"\n}\n\n ```\n\n4\\. Invalid password\n\n``` json\n{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"Password must be between 6 and 30 characters\"\n}\n\n ```"
+    },
+    {
+      "name": "Login Tests",
+      "item": [
+        {
+          "name": "TC-LOGIN-01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\npm.test(\"HTTP status should be 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Login should be successful\", function () {\n    pm.expect(response.success).to.eql(true);\n});\n\npm.test(\"Token should be present\", function () {\n    pm.expect(response.data.token).to.exist;\n});\n\npm.collectionVariables.set(\n    \"authToken\",\n    response.data.token\n);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{userEmail}}\",\n    \"password\": \"{{userPassword}}\"\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/login",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC-LOGIN-02",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\t\npm.test(\"HTTP status should be 401\", function () {\n    pm.response.to.have.status(401);\n});\n\npm.test(\"Login should be un-successful\", function () {\n    pm.expect(response.success).to.eql(false);\n});\n\npm.test(\"Message should describe invalid\", function () {\n    pm.expect(response.message).to.eql(\"Incorrect email address or password\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"wrongemail@mail.com\",\n    \"password\": \"wrongpassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/login",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC-LOGIN-03",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\t\npm.test(\"HTTP status should be 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Login should be un-successful\", function () {\n    pm.expect(response.success).to.eql(false);\n});\n\npm.test(\"Message should describe invalid email\", function () {\n    pm.expect(response.message).to.eql(\"A valid email address is required\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"\",\n    \"password\": \"wrongpassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/login",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TC-LOGIN-04",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\t\npm.test(\"HTTP status should be 400\", function () {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"Login should be un-successful\", function () {\n    pm.expect(response.success).to.eql(false);\n});\n\npm.test(\"Message should describe invalid password\", function () {\n    pm.expect(response.message).to.eql(\"Password must be between 6 and 30 characters\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"wrongemail@gmail.com\",\n    \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/login",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "**End Point -** [https://practice.expandtesting.com/notes/api/users/login](https://practice.expandtesting.com/notes/api/users/login)\n\n**Method -** <u>POST</u>\n\n**Request Variables -** email and password\n\n**Test Scenario - Login Tests**\n\n| **Test Case ID** | **Test Case Description** |\n| --- | --- |\n| TC-LOGIN-01 | Valid email + Valid password |\n| TC-LOGIN-02 | Invalid credentials |\n| TC-LOGIN-03 | Empty email |\n| TC-LOGIN-04 | Empty password |\n\n**Sample Server Response**\n\n1. Invalid credentials\n    \n\n``` json\n{\n  \"success\": false,\n  \"status\": 401,\n  \"message\": \"Incorrect email address or password\"\n}\n\n ```\n\n2\\. Valid credentials\n\n``` json\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"id\": \"64189a74314e9f0218a5213c\",\n    \"email\": \"practice@expandtesting.com\",\n    \"name\": \"practice\",\n    \"token\": \"728eb6906b0a4e83a7d789a0da9801...\"\n  }\n}\n\n ```\n\n3\\. Empty email\n\n``` json\n{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"A valid email address is required\"\n}\n\n ```\n\n4\\. Empty password\n\n``` json\n{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"Password must be between 6 and 30 characters\"\n}\n\n ```"
+    },
+    {
+      "name": "Logout Tests",
+      "item": [
+        {
+          "name": "TC-LOGOUT-01",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const response = pm.response.json();\n\npm.test(\"HTTP status should be 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Success should be true\", function () {\n    pm.expect(response.success).to.eql(true);\n});\n\npm.test(\"Correct message is returned\", function () {\n    pm.expect(response.message).to.eql(\"User has been successfully logged out\");\n});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-auth-token",
+                "value": "{{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "https://practice.expandtesting.com/notes/api/users/logout",
+              "protocol": "https",
+              "host": [
+                "practice",
+                "expandtesting",
+                "com"
+              ],
+              "path": [
+                "notes",
+                "api",
+                "users",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "**End Point -** [https://practice.expandtesting.com/notes/api/users/logout](https://practice.expandtesting.com/notes/api/users/login)\n\n**Method -** <u>DELETE</u>\n\n``` json\n0f93d0c73c444b7582e0880b600979658d001d1360c141888291f015992b0518\n\n ```\n\n**Test Scenario - Logout Tests**\n\n| **Test Case ID** | **Test Case Description** |\n| --- | --- |\n| TC-LOGOUT-01 | Valid Token |\n| TC-LOGOUT-02 | Not logged-in + Logout |\n\n**Sample Server Response**\n\n1. Successful Logout\n    \n\n``` json\n{\n  \"success\": true,\n  \"status\": 200,\n  \"message\": \"Successful Request\"\n}\n\n ```\n\n2\\. Not logged-in + Logout\n\n``` json\n{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"Bad Request\"\n}\n\n ```\n\n3\\. Empty email\n\n``` json\n{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"A valid email address is required\"\n}\n\n ```\n\n4\\. Empty password\n\n``` json\n{\n  \"success\": false,\n  \"status\": 400,\n  \"message\": \"Password must be between 6 and 30 characters\"\n}\n\n ```"
+    }
+  ],
+  "variable": [
+    {
+      "key": "userEmail",
+      "value": ""
+    },
+    {
+      "key": "userPassword",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "authToken",
+      "value": ""
+    }
+  ]
+}
