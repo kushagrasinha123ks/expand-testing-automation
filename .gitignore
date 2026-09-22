@@ -3,7 +3,8 @@ node_modules/
 
 # Playwright test artifacts
 test-results/
-playwright-report/
+playwright-report/*
+!playwright-report/index.html
 blob-report/
 playwright/.cache/
 playwright/.auth/

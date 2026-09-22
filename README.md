@@ -1,121 +1,149 @@
-# UI and API Test Automation Suite
+# UI & API Test Automation Suite
 
-An automated testing portfolio project for the [Expand Testing practice application](https://practice.expandtesting.com/). It combines browser-based UI testing with API collection testing to validate authentication workflows at both layers.
+End-to-end test automation for the [Expand Testing practice application](https://practice.expandtesting.com/), combining Playwright browser tests with Postman/Newman API tests.
 
-## At a glance
-
-| Area | Tool | Coverage |
+| Test layer | Tools | Latest saved result |
 | --- | --- | --- |
-| UI | Playwright | 14 login and registration scenarios, run in Chromium and Firefox (28 executions) |
-| API | Postman + Newman | 10 requests covering health check, registration, login, and logout |
-| Test data | Faker | Unique registration data generated at runtime |
+| UI | Playwright + Faker | **28/28 passed** across Chromium and Firefox |
+| API | Postman + Newman | **12 requests, 40 assertions, 0 failures** |
 
-The suite demonstrates positive and negative testing, cross-browser execution, reusable test data, response validation, and chained API workflows.
+[UI coverage](#1-ui-testing) · [API coverage](#2-api-testing) · [Setup and execution](#3-setup-and-execution) · [Project structure](#project-structure)
 
-## Test coverage
+## 1. UI testing
 
-### UI tests
+The Playwright suite validates the public login and registration workflows through the browser. Fourteen scenarios run against both Chromium and Firefox, producing 28 total test executions.
 
-The Playwright tests target `https://practice.expandtesting.com` and validate:
+![Playwright UI test summary](/assets/playwright-ui-test-summary.png)
 
-- **Login:** successful login and logout, invalid username/password combinations, empty username, and empty password.
-- **Registration:** successful account creation, minimum username and password lengths, mismatched passwords, required fields, and duplicate usernames.
-- **Browser coverage:** Chromium and Firefox desktop profiles.
-- **Assertions:** navigation, visible feedback messages, and expected success or validation states.
+### What is tested?
 
-Fresh registration credentials are generated with Faker to keep the successful registration scenario independent between runs.
-
-### API tests
-
-The Postman collection [`postman/NotesAPI-Testing.postman_collection.json`](postman/NotesAPI-Testing.postman_collection.json) tests the Notes API:
-
-| Group | Scenarios |
+| Feature | Scenarios |
 | --- | --- |
-| Health | API availability and the expected success response |
-| Register | Successful user creation; invalid name, email, and password |
-| Login | Successful authentication; incorrect credentials; invalid email and password |
-| Logout | Authenticated logout using the token returned by login |
+| Login | Successful login and logout; invalid username/password combinations; empty username; empty password |
+| Registration | Successful registration; short username; short password; password mismatch; missing required fields; duplicate username |
+| Validation | URL changes, visible status messages, error text, and logout availability |
+| Test data | Unique registration credentials generated at runtime with Faker |
+| Browsers | Chromium and Firefox desktop profiles |
 
-Assertions verify HTTP status codes, success flags, response messages, returned user data, and authentication-token creation. The collection generates a unique user, saves its credentials and ID, logs in, stores the returned token, and uses that token to log out. Run the complete collection in its defined order so this workflow remains intact.
+**Test source:** [`login.spec.js`](tests/ui-tests/login.spec.js) · [`register.spec.js`](tests/ui-tests/register.spec.js)  
+**Execution evidence:** [Open the saved Playwright HTML report](playwright-report/index.html)
 
-## Project structure
+## 2. API testing
 
-```text
-.
-├── tests/ui-tests/
-│   ├── login.spec.js
-│   └── register.spec.js
-├── postman/
-│   └── NotesAPI-Testing.postman_collection.json
-├── utils/
-│   └── fakeUser.js
-├── playwright.config.js
-└── package.json
-```
+The Postman collection tests the Notes API as an ordered authentication workflow. A pre-request script generates a unique user; collection variables carry the credentials, user ID, and authentication token between requests.
 
-## Setup
+![Newman Notes API test report](/assets/newman-api-test-report.png)
+
+### What is tested?
+
+| Group | Requests | Coverage |
+| --- | ---: | --- |
+| Health | 1 | API availability, status, success flag, and response message |
+| Register | 4 | Successful account creation and invalid name, email, and password validation |
+| Login | 4 | Successful authentication, token creation, incorrect credentials, and missing/invalid inputs |
+| Logout | 3 | Missing token, successful logout with a valid token, and rejection of the logged-out token |
+
+Assertions verify HTTP status codes, success flags, response messages, returned user data, and authentication-token behavior. The collection must run in its defined order because later requests use data created by earlier requests.
+
+**Collection:** [`NotesAPI-Testing.postman_collection.json`](postman/NotesAPI-Testing.postman_collection.json)  
+**Execution evidence:** [Open the saved Newman HTML report](postman-report/api-test-report.html)
+
+## 3. Setup and execution
 
 ### Prerequisites
 
 - Node.js 20 or newer
 - npm 10 or newer
 
-Clone the repository, open it in a terminal, and install the project dependencies:
+### Step 1: Clone and install
 
 ```bash
+git clone https://github.com/kushagrasinha123ks/expand-testing-automation.git
+cd expand-testing-automation
 npm ci
 ```
 
-Install the browsers used by the Playwright configuration:
+`npm ci` installs Playwright, Newman, Faker, and the Newman HTML reporter using the locked dependency versions.
+
+### Step 2: Install Playwright browsers
 
 ```bash
 npx playwright install chromium firefox
 ```
 
-`npm ci` installs both Playwright and Newman from the versions locked in `package-lock.json`; no global installation is required.
+### Step 3: Run the UI tests
 
-## Run the tests
-
-### UI suite with Playwright
-
-Run all UI tests in Chromium and Firefox:
+Run all scenarios in Chromium and Firefox:
 
 ```bash
 npx playwright test
 ```
 
-Useful alternatives:
-
-```bash
-# Run in one browser
-npx playwright test --project=chromium
-
-# Run one test file
-npx playwright test tests/ui-tests/login.spec.js
-
-# Watch the browser during execution
-npx playwright test --headed
-```
-
-Open the generated HTML report:
+Open the generated report:
 
 ```bash
 npx playwright show-report
 ```
 
-### API suite with Newman
+Useful focused runs:
 
-Run the full Postman collection from the command line:
+```bash
+# Chromium only
+npx playwright test --project=chromium
+
+# Login scenarios only
+npx playwright test tests/ui-tests/login.spec.js
+
+# Watch browser execution
+npx playwright test --headed
+```
+
+### Step 4: Run the API tests
+
+Run the Postman collection in the terminal:
 
 ```bash
 npx newman run postman/NotesAPI-Testing.postman_collection.json
 ```
 
-The collection is self-contained: its pre-request script creates unique account data, and collection variables pass credentials and the authentication token between requests.
+Generate both terminal output and the standalone HTML report:
 
-## Technology stack
+```bash
+npx newman run postman/NotesAPI-Testing.postman_collection.json \
+  --reporters cli,htmlextra \
+  --reporter-htmlextra-export postman-report/api-test-report.html \
+  --reporter-htmlextra-title "Notes API Test Report"
+```
 
-- JavaScript
-- Playwright Test
-- Postman / Newman
-- Faker
+Open `postman-report/api-test-report.html` in a browser to inspect request-level assertions, status codes, response times, and failures.
+
+## Project structure
+
+```text
+.
+├── assets/
+│   ├── playwright-ui-test-summary.png
+│   └── newman-api-test-report.png
+├── tests/ui-tests/
+│   ├── login.spec.js
+│   └── register.spec.js
+├── postman/
+│   └── NotesAPI-Testing.postman_collection.json
+├── playwright-report/
+│   └── index.html
+├── postman-report/
+│   └── api-test-report.html
+├── utils/
+│   └── fakeUser.js
+├── playwright.config.js
+└── package.json
+```
+
+## Skills demonstrated
+
+- Positive, negative, boundary, and authentication-lifecycle testing
+- Cross-browser UI automation and accessible Playwright locators
+- Dynamic test-data generation and reusable setup
+- API chaining with collection variables and pre-request scripts
+- Response, schema-field, status-code, navigation, and UI-message assertions
+- CLI execution and shareable HTML test reporting
